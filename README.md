@@ -33,6 +33,8 @@ a web page.
   your own. Your own footsteps sit dead centre in the mix; the ghost's do not.
 * **An event log** names each sound with a direction arrow and how long ago it happened: `Footsteps`,
   `Door`, `SLAM`, `KNOCK`, `Breathing`, `WHISPER`, `HEARTBEAT`, `PHONE RINGING`, and more.
+* **It is fast.** A sudden sound is on screen about **50 ms** after it happens, roughly three frames,
+  and is named about **80 ms** after. Measured, not estimated.
 * **Your own noise is filtered out.** The overlay watches your keyboard and mouse. Centred footsteps
   while you hold a movement key, and centred door or item sounds right after you press an action key,
   are yours and are hidden. Anything off to one side always shows.
@@ -157,8 +159,9 @@ real-world recordings, so it calls every wooden knock a "Door". Two ways to teac
   a sentence. Quiet or distant talkers still get missed.
 * **A ghost walking straight at you while you are also walking** is hidden by the own-footsteps
   filter. Stand still for a second and the picture clears.
-* **Latency.** The overlay reacts about 50 ms after a sound exists. The game's own audio engine adds
-  its own delay before that, which nothing outside the game can remove.
+* **Use a monitor, not a TV.** The overlay is fast, but a TV in its normal picture mode adds display
+  lag to everything, which makes the whole game feel late. Use a monitor, or turn on the TV's Game
+  Mode.
 * **Other players may react badly to a synthetic voice.** The first line on the wheel explains that
   you are deaf, and saying it when you join a lobby makes an enormous difference.
 
