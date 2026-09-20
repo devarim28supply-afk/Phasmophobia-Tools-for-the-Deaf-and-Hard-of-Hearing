@@ -18,9 +18,13 @@ a web page.
 
 ## What it does
 
+*Every screenshot below is from a real match.*
+
 ### 1. See sounds, and where they are
 
-![The overlay over a mission: edge glow on the left, footprints for footsteps that are not yours, and a live event log](docs/images/overlay-sounds.png)
+![A dark kitchen in-game. Down the left the overlay lists Knock / thump 2s, Footsteps now, Breathing now, Gasp now, Voice now and Sigh now, each with a direction arrow and a coloured dot. Across the bottom are confidence chips reading Breathing 88%, Gasp 78%, Voice 65%, Footsteps 63%.](docs/images/overlay-sounds.png)
+
+*The ghost is in the room, breathing and gasping. You can see it.*
 
 * **The screen edges glow** where sound is coming from. Left edge means it is louder on your left,
   right edge on your right. With a surround setup, the top edge is in front of you and the bottom
@@ -33,9 +37,15 @@ a web page.
   while you hold a movement key, and centred door or item sounds right after you press an action key,
   are yours and are hidden. Anything off to one side always shows.
 
+![The contract board in the lobby. A pair of orange footprint icons sits against the left edge of the screen next to a red glow, and the event log reads Footsteps, Footsteps, Footsteps and Knock / thump, each with a left-pointing arrow.](docs/images/overlay-footprints.png)
+
+*Footsteps too far to the left to be your own: footprints on that edge.*
+
 ### 2. Read what people say
 
-![Live captions of voice chat, drawn by the overlay at the bottom of the screen](docs/images/overlay-captions.png)
+![Another player in a yellow jacket standing in the lobby. At the bottom of the screen the overlay shows a chip reading Voice 94% and three lines of caption: "Actually it was...", "Nice", "meeting you too."](docs/images/overlay-captions.png)
+
+*A teammate saying "nice meeting you too", read off the screen.*
 
 Live captions of everything the game plays, including other players' voice chat, the spirit box, and
 the game's own voice lines. Transcribed locally by [Whisper](https://github.com/openai/whisper)
@@ -47,7 +57,7 @@ often going silent for a whole match. This is the reason the project ships its o
 
 ### 3. Talk to your team
 
-![The phrase wheel: seven categories in a ring, the lines of the selected one beside it](docs/images/phrase-wheel.png)
+![The phrase wheel open over the truck. A ring is split into seven labelled segments: Quick (highlighted), Evidence, Ghost did, Where, Doing, Status and Ghost type. Its centre reads "Quick — scroll = turn, click a line to say it". To the right is a numbered list of nine lines, beginning "Hi everyone. I am deaf, so I talk through a computer..." and including "It is hunting. Hide!" and "I found the ghost room. Come here."](docs/images/phrase-wheel.png)
 
 * **Middle-click** opens a phrase wheel. **Scroll** to turn between seven categories, **point and
   click** a line, and it is spoken into the game's microphone in a natural voice.
