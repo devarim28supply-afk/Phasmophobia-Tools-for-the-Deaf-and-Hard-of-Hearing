@@ -16,7 +16,7 @@ captioner falls back to the CPU and takes a few seconds, which is still usable.
 ## 2. Build
 
 ```powershell
-git clone https://github.com/<you>/Phasmophobia-Tools-for-the-Deaf-and-Hard-of-Hearing.git
+git clone https://github.com/devarim28supply-afk/Phasmophobia-Tools-for-the-Deaf-and-Hard-of-Hearing.git
 cd Phasmophobia-Tools-for-the-Deaf-and-Hard-of-Hearing
 powershell -ExecutionPolicy Bypass -File scripts\setup.ps1
 ```

@@ -85,7 +85,7 @@ Everything runs offline once installed. No account and no API key is required fo
 ## Install
 
 ```powershell
-git clone https://github.com/<you>/Phasmophobia-Tools-for-the-Deaf-and-Hard-of-Hearing.git
+git clone https://github.com/devarim28supply-afk/Phasmophobia-Tools-for-the-Deaf-and-Hard-of-Hearing.git
 cd Phasmophobia-Tools-for-the-Deaf-and-Hard-of-Hearing
 powershell -ExecutionPolicy Bypass -File scripts\setup.ps1
 ```
@@ -207,7 +207,7 @@ Standing on:
 
 ## License
 
-[MIT](LICENSE). Use it, change it, ship it.
+[MIT](LICENSE). Use it, change it, ship it. Third-party notices are in [NOTICE.md](NOTICE.md).
 
 This project is not affiliated with Kinetic Games. Phasmophobia is their trademark. No game asset is
 included or redistributed.
