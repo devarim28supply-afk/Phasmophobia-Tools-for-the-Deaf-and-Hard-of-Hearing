@@ -1,0 +1,36 @@
+# build output
+app/
+bin/
+obj/
+*.user
+
+# models: downloaded by scripts/setup.ps1, far too big for git
+model/*.onnx
+python/.venv/
+*.pt
+
+# EXTRACTED GAME AUDIO - never commit this.
+# It belongs to Kinetic Games. The extractor reads your own installed copy.
+gameclips/
+samples/
+**/samples/
+**/phrases/cache/
+*.wav
+*.mp3
+
+# third-party installers (link to them, do not redistribute)
+setup/
+
+# local state
+log.txt
+config.json
+phrases.json
+!config/config.example.json
+!config/phrases.example.json
+
+# editors / OS
+.vs/
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini

@@ -1,0 +1,15 @@
+# Local voice (Kokoro) and local captions (faster-whisper).
+# Installed into app\python\.venv by scripts\setup.ps1. Python 3.12.
+
+# text to speech
+kokoro>=0.9
+espeakng-loader
+soundfile
+
+# speech to text
+faster-whisper>=1.1
+
+# GPU support for faster-whisper on NVIDIA cards.
+# Harmless on machines without one: the captioner falls back to the CPU.
+nvidia-cublas-cu12
+nvidia-cudnn-cu12

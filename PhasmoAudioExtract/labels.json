@@ -1,0 +1,302 @@
+[
+  {
+    "Pattern": "Prestige|MainMenu|Shop_|Shop UI|Hint None|Well done|Good job|Nice work|Next section|count up|Arrival|Pause_flip|Page_turn|Tape rip|Velcro|Tarp_Slap|Tent hit|Paw twitch|VOX_TVsubt|DollPuzzle_Poem|Cursed Voiceover|Puzzle|Arcade|Safe_|Jackalope|E26_|Easter2|HOL24|H24_|W24_|Winters_Jest|Krampus",
+    "Label": "skip"
+  },
+  {
+    "Pattern": "MUSIC|Jukebox|_MX_|_MUS_|Music_LOOP|Shadow-Cleansing|Shadows_w-Vox|WritersRoom_Radio|Ritual|Chanting|Jack-box|MainToneLoop|Riser",
+    "Label": "skip"
+  },
+  {
+    "Pattern": "EMF.*(On|Off|OFF|ON)$|Thermo|UV_|UVLight|DOTS|Motion|Sound_?Sensor|Incense|Smudge|Salt|Igniter|Tripod|Walkie|Journal|Sanity|Pills|Photo_Camera|PhotoCamera|VideoCamera|GoPro|Flashlight|Lantern|Paramic (On|Off)|ParabolicMicrophone|Spiritbox_T\\d_(On|Off)|Spirit box.*drop|Cam \\d drop|Cruci \\d drop|Crucifix Turn|Candle wick|Head_?Gear|HeadGear|Equipment_Button|Button Click|BUTTON_(Bright|Click)|Button_on_off|Remote Click|Fan button|Truck Step|Truck|Van_|Porta|Key Pickup|T\\d_(Salt|Igniter)|Ghost_writing_book",
+    "Label": "skip"
+  },
+  {
+    "Pattern": "^AMB|_AMB_|AMB_2D|^Amb_|Rain|Snow|Fog|Windy|Wind_|Thunder|Campfire|Generator|Fridge|Fan_Loop|CeilingFan|Vent_Loop|Dryer|Stove|Mixer|Cogs|Water-cooler_Hum|Fizzy|Fluorescent|Neon|Rats|Bushes|Plant_Rustle|planter|Corn_Rustling|DustFall|Owl|Bird|Crow|Cricket|Insect|Dog_Bark|non-weather|metal_rooms|wooden_rooms|Clock.*Tick|Tick_Lp|Ticking|Espresso|Steam_Hiss|Gas_Canister|Embalming|Hanging|Shutters|Door_scratchy|Static Noise|White-Noise|Static_Noise|Tier_1_static|Noise_Loop",
+    "Label": "skip"
+  },
+  {
+    "Pattern": "Outdoor_Ambience|Ambience|SplashScreen|Revive|static_loop|Console|Laptop|MacComputer|Treadmill|Toothbrush|Toothpaste|Apron|Vacuum|hoover|ACUnit|Straighteners|ProteinBar|Cat-Tiffin|ENV_Animal|Ocean|Gas cooker|snooker|extractor|cog Turn|Orange_juice|Dartboard|PunchingBag|Beartrap|beartrap|Fence_Shake|Grandfather Loop|Warning_Sign|Roller_Blinds",
+    "Label": "skip"
+  },
+  {
+    "Pattern": "Hunting|hunt",
+    "Label": "GHOST HUNTING"
+  },
+  {
+    "Pattern": "PlayerDeath|Player_Death|Player Dying|\\(death\\)|^Death|Jumpscare|light attack|strong attack|damaged",
+    "Label": "GHOST ATTACK"
+  },
+  {
+    "Pattern": "CrucifixBurn|Crucifix Burn|Crucifix burn",
+    "Label": "CRUCIFIX BURNED"
+  },
+  {
+    "Pattern": "Ghost writing|Writing \\d spooky",
+    "Label": "GHOST WRITING"
+  },
+  {
+    "Pattern": "inhales",
+    "Label": "Breathing"
+  },
+  {
+    "Pattern": "^BREAK_",
+    "Label": "skip"
+  },
+  {
+    "Pattern": "Rocking chair",
+    "Label": "skip"
+  },
+  {
+    "Pattern": "SQUEAK_Metal_Hinge|BoardWoodScraping",
+    "Label": "skip"
+  },
+  {
+    "Pattern": "Bathroom_Tile_Falls",
+    "Label": "skip"
+  },
+  {
+    "Pattern": "^Kill",
+    "Label": "SPIRIT BOX: kill"
+  },
+  {
+    "Pattern": "^(Far|Close|Hate|Young|Old|Hurt|Here|Away|Behind|Attack|Better hide|Adult|Die|Leave|Run|Next|Trapped|Help|Hello|Yes|No|hoh)( |$|_)",
+    "Label": "SPIRIT BOX ANSWER"
+  },
+  {
+    "Pattern": "Dead Voices|Whispering Voices",
+    "Label": "WHISPER"
+  },
+  {
+    "Pattern": "whisper",
+    "Label": "WHISPER"
+  },
+  {
+    "Pattern": "breath",
+    "Label": "Breathing"
+  },
+  {
+    "Pattern": "Banshee",
+    "Label": "BANSHEE SCREAM"
+  },
+  {
+    "Pattern": "Scream",
+    "Label": "SCREAM"
+  },
+  {
+    "Pattern": "Laugh",
+    "Label": "Laugh"
+  },
+  {
+    "Pattern": "Music ?Box",
+    "Label": "MUSIC BOX"
+  },
+  {
+    "Pattern": "Singing|spirit song",
+    "Label": "Singing"
+  },
+  {
+    "Pattern": "ParaSound|Para sound",
+    "Label": "Ghost voice"
+  },
+  {
+    "Pattern": "Mumble|OS_Talk|Talking|Mouthfeel|Voice \\d",
+    "Label": "Ghost voice"
+  },
+  {
+    "Pattern": "Doll.*(takemewithyou|hideandseek|Cry|Laugh|twinkle|likeplaying|Sing|Talk|Voice|Vox)",
+    "Label": "DOLL VOICE"
+  },
+  {
+    "Pattern": "Doll_Foley|Doll_clean|Doll",
+    "Label": "skip"
+  },
+  {
+    "Pattern": "Gnome_Vox",
+    "Label": "skip"
+  },
+  {
+    "Pattern": "Heartbeat",
+    "Label": "HEARTBEAT"
+  },
+  {
+    "Pattern": "Crucifix Burn|Crucifix burn",
+    "Label": "CRUCIFIX BURNED"
+  },
+  {
+    "Pattern": "Candle Blow",
+    "Label": "Candle blown out"
+  },
+  {
+    "Pattern": "Ouija",
+    "Label": "OUIJA BOARD"
+  },
+  {
+    "Pattern": "Summoning",
+    "Label": "skip"
+  },
+  {
+    "Pattern": "Voodoo",
+    "Label": "skip"
+  },
+  {
+    "Pattern": "Tarot|The Fool",
+    "Label": "skip"
+  },
+  {
+    "Pattern": "monkey|Monkey",
+    "Label": "skip"
+  },
+  {
+    "Pattern": "EMF",
+    "Label": "EMF reading"
+  },
+  {
+    "Pattern": "Spiritbox|Spirit box",
+    "Label": "skip"
+  },
+  {
+    "Pattern": "Fuse|Breaker",
+    "Label": "FUSE BOX"
+  },
+  {
+    "Pattern": "Slam",
+    "Label": "Door slam"
+  },
+  {
+    "Pattern": "Knock",
+    "Label": "KNOCK"
+  },
+  {
+    "Pattern": "Door.*Rattle|DoorRattle",
+    "Label": "Door rattle"
+  },
+  {
+    "Pattern": "Floorboard",
+    "Label": "skip"
+  },
+  {
+    "Pattern": "(Door|Doors|Hinge|Wardrobe|wardr).*(Creak|creak|Squeak|squeak|Hinge|HiLo)|Creak",
+    "Label": "skip"
+  },
+  {
+    "Pattern": "Cabinet|Drawer|Cupboard|Wardrobe|wardr|Locker|Cigar_box|Mailbox|Toilet-Lid|Toilet_hinge",
+    "Label": "skip"
+  },
+  {
+    "Pattern": "Gate",
+    "Label": "skip"
+  },
+  {
+    "Pattern": "key lock|Key lock|Door Lock|unlock|Unlock|Key unlock|Door_Lock",
+    "Label": "skip"
+  },
+  {
+    "Pattern": "Door.*(Open|OPEN|GhostOpen)|(Open|OPEN).*Door",
+    "Label": "skip"
+  },
+  {
+    "Pattern": "Door.*(Close|CLOSE)|(Close|CLOSE).*Door",
+    "Label": "skip"
+  },
+  {
+    "Pattern": "Window Knocking",
+    "Label": "KNOCK"
+  },
+  {
+    "Pattern": "Light_Switch|Lightswitch|Switch_(NEW|OLD)|Lamp.*(On|Off|ON|OFF|OnOff|Tap)|Mirror_Light_(On|Off)|Light_Humming|Candle light|Tv On|Tv Off|TV_OnOff|TAN_Fan_(On|Off)|TAN_Stove|Dryer_On",
+    "Label": "Light switch"
+  },
+  {
+    "Pattern": "Bulb smash",
+    "Label": "Bulb smash"
+  },
+  {
+    "Pattern": "Mirror_Smash",
+    "Label": "Mirror smash"
+  },
+  {
+    "Pattern": "footstep|Footstep|FOOTSTEP|^Steps?$|^step$|Underneath stairs|Stairs footsteps|Wet footstep|Metallic_(Walk|Sprint|Run)",
+    "Label": "Footsteps"
+  },
+  {
+    "Pattern": "Piano",
+    "Label": "PIANO"
+  },
+  {
+    "Pattern": "Zither|Guitar",
+    "Label": "skip"
+  },
+  {
+    "Pattern": "PhoneRing|Phone_Ring|Phone-Ring|Ringtone",
+    "Label": "PHONE RINGING"
+  },
+  {
+    "Pattern": "Creepy radio|Creepy_radio|Radio alarm|Radio",
+    "Label": "Radio"
+  },
+  {
+    "Pattern": "Tv Noise|TV",
+    "Label": "TV"
+  },
+  {
+    "Pattern": "CarAlarm|Car Alarm",
+    "Label": "CAR ALARM"
+  },
+  {
+    "Pattern": "CarLock",
+    "Label": "skip"
+  },
+  {
+    "Pattern": "Horn",
+    "Label": "Car horn"
+  },
+  {
+    "Pattern": "Siren",
+    "Label": "Siren"
+  },
+  {
+    "Pattern": "Alarm",
+    "Label": "ALARM"
+  },
+  {
+    "Pattern": "Bell",
+    "Label": "Bell"
+  },
+  {
+    "Pattern": "Clock.*Chime|Chime",
+    "Label": "Clock chime"
+  },
+  {
+    "Pattern": "Sink|Tap_ON|Tap_OFF|Shower|Water-Cooler_(ON|OFF|Pour)|Mr-Drippy",
+    "Label": "skip"
+  },
+  {
+    "Pattern": "TOILET_Flush|Toilet flush",
+    "Label": "skip"
+  },
+  {
+    "Pattern": "Dog-Toy|Squeaky",
+    "Label": "Squeaky toy"
+  },
+  {
+    "Pattern": "Mannequin_Move|Mannequin",
+    "Label": "Mannequin moving"
+  },
+  {
+    "Pattern": "Shower_Slap|Shower_Squeak",
+    "Label": "Shower curtain"
+  },
+  {
+    "Pattern": "Drop|drop|Throw|throw|Impact|impact|Smash|smash|Clatter|clatter|Hit|^glass|^wood|^metal|^ceramic|^Tin|Basketball|Plastic|Wood touch|Cookie Tin|PROP|Prop",
+    "Label": "skip"
+  },
+  {
+    "Pattern": "Door|DOOR",
+    "Label": "skip"
+  },
+  {
+    "Pattern": "Interact",
+    "Label": "skip"
+  }
+]

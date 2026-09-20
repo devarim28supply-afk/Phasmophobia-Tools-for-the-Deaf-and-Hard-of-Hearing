@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AssemblyName>PhasmoSound</AssemblyName>
+    <RootNamespace>PhasmoSound</RootNamespace>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NAudio" Version="2.2.1" />
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.20.1" />
+    <PackageReference Include="System.Speech" Version="9.0.0" />
+  </ItemGroup>
+
+  <!-- The sound classifier. yamnet.onnx (16 MB) is fetched by scripts\setup.ps1, so a fresh
+       clone still builds without it; the overlay reports a clear error if it is missing. -->
+  <ItemGroup>
+    <None Include="..\model\yamnet.onnx" Link="model\yamnet.onnx" CopyToOutputDirectory="PreserveNewest" Condition="Exists('..\model\yamnet.onnx')" />
+    <None Include="..\model\yamnet_class_map.csv" Link="model\yamnet_class_map.csv" CopyToOutputDirectory="PreserveNewest" Condition="Exists('..\model\yamnet_class_map.csv')" />
+  </ItemGroup>
+
+  <!-- The local voice + caption servers run from python\ next to the exe (see Config.KokoroScript). -->
+  <ItemGroup>
+    <None Include="..\python\kokoro_server.py" Link="python\kokoro_server.py" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\python\captions_server.py" Link="python\captions_server.py" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\python\elevenlabs_phrases.py" Link="python\elevenlabs_phrases.py" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\python\phrases.html" Link="python\phrases.html" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\config\phrases.example.json" Link="phrases\phrases.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

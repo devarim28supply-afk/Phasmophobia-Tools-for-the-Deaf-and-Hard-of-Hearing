@@ -1,0 +1,40 @@
+MIT License
+
+Copyright (c) 2026 Kaalob Moran
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+This project bundles no third-party binaries. It downloads and uses, at run time:
+
+  YAMNet                 Apache-2.0   Google
+  Whisper                MIT          OpenAI
+  faster-whisper         MIT          SYSTRAN
+  Kokoro-82M             Apache-2.0   hexgrad
+  NAudio                 MIT          Mark Heath
+  ONNX Runtime           MIT          Microsoft
+  AssetsTools.NET        MIT          nesrak1
+  Fmod5Sharp             MIT          Samboy Coding
+  NVorbis                MIT          Andrew Ward
+
+VB-CABLE (VB-Audio) is donationware and is not redistributed here; install it yourself.
+
+This project is not affiliated with or endorsed by Kinetic Games. Phasmophobia is their
+trademark. No game asset is included or redistributed by this repository.

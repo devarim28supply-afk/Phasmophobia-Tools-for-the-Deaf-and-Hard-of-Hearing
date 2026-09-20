@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PhasmoSound phrases</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root { color-scheme: dark; --bg:#121316; --panel:#1b1d22; --line:#2c2f37; --text:#e8eaf0; --dim:#9aa1b0; --acc:#7fb3ff; --ok:#8fe39a; --warn:#ffcf70; --bad:#ff8080; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font: 16px/1.4 "Segoe UI", system-ui, sans-serif; }
+  header { padding: 18px 24px 10px; border-bottom: 1px solid var(--line); display:flex; gap:16px; align-items:baseline; flex-wrap:wrap; }
+  h1 { font-size: 22px; margin:0; }
+  header .hint { color: var(--dim); font-size: 14px; }
+  main { max-width: 1100px; margin: 0 auto; padding: 18px 24px 60px; }
+  .toolbar { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin: 12px 0 18px; }
+  button { background:#262a33; color:var(--text); border:1px solid var(--line); border-radius:8px; padding:8px 14px; font-size:15px; cursor:pointer; }
+  button:hover { border-color: var(--acc); }
+  button.primary { background: var(--acc); color:#0c0f14; border-color: var(--acc); font-weight:600; }
+  button.small { padding: 4px 9px; font-size: 13px; }
+  .row { display:grid; grid-template-columns: 42px 1fr 150px 170px; gap:10px; align-items:center; padding:10px 12px; background:var(--panel); border:1px solid var(--line); border-radius:10px; margin-bottom:8px; }
+  .row .num { font-weight:700; color:var(--acc); font-size:18px; text-align:center; }
+  .row textarea { width:100%; min-height: 44px; resize: vertical; background:#0f1115; color:var(--text); border:1px solid var(--line); border-radius:8px; padding:8px 10px; font: inherit; }
+  .row .audio { font-size:13px; color:var(--dim); }
+  .row .audio b { color: var(--ok); }
+  .row .ctl { display:flex; gap:6px; justify-content:flex-end; }
+  .page { color: var(--dim); font-size: 13px; margin: 14px 0 6px; }
+  .status { color: var(--warn); min-height: 22px; margin-top: 8px; }
+  details { margin-top: 26px; background: var(--panel); border:1px solid var(--line); border-radius:10px; padding: 12px 16px; }
+  details summary { cursor:pointer; font-weight:600; }
+  details label { display:block; margin: 10px 0 4px; color: var(--dim); font-size: 14px; }
+  details input, details select { width: 100%; max-width: 520px; background:#0f1115; color:var(--text); border:1px solid var(--line); border-radius:8px; padding:8px 10px; font: inherit; }
+  .muted { color: var(--dim); font-size: 14px; }
+  kbd { background:#262a33; border:1px solid var(--line); border-radius:5px; padding:1px 6px; font-size: 13px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>PhasmoSound phrases</h1>
+  <div class="hint">In the game: <kbd>F5</kbd> opens the board, press the number to say a line, <kbd>F5</kbd> again for the next page of 9, <kbd>Esc</kbd> closes.</div>
+</header>
+<main>
+  <div class="toolbar">
+    <button class="primary" id="save">Save to overlay</button>
+    <button id="add">+ Add phrase</button>
+    <button id="gen-kokoro">Make audio now (Kokoro, local)</button>
+    <span class="status" id="status"></span>
+  </div>
+  <div id="list"></div>
+  <p class="muted">Order matters: 1 to 9 is page one, 10 to 18 is page two, and so on. Put the lines you say most at the top. Lines without audio are spoken by Kokoro the first time (about a second), then cached.</p>
+
+  <details id="eleven">
+    <summary>ElevenLabs audio (optional, better voice, free tier is enough for this list)</summary>
+    <label>API key</label>
+    <input id="el-key" type="password" placeholder="paste your ElevenLabs API key">
+    <label>Voice</label>
+    <select id="el-voice"><option value="pNInz6obpgDQGcFmaJgB">Adam (default)</option></select>
+    <div class="toolbar" style="margin-top:10px">
+      <button id="el-list">Load my voices</button>
+      <button class="primary" id="el-gen">Generate missing audio with ElevenLabs</button>
+    </div>
+    <p class="muted">Only lines without ElevenLabs audio are generated, so re-running costs nothing for existing lines. Edited lines get new audio next time you generate.</p>
+  </details>
+</main>
+<script>
+const $ = s => document.querySelector(s);
+let phrases = [];
+async function load() {
+  const r = await fetch('/phrases'); phrases = await r.json(); render();
+}
+function render() {
+  const list = $('#list'); list.innerHTML = '';
+  phrases.forEach((p, i) => {
+    if (i % 9 === 0) { const h = document.createElement('div'); h.className = 'page'; h.textContent = 'Page ' + (Math.floor(i / 9) + 1); list.appendChild(h); }
+    const row = document.createElement('div'); row.className = 'row';
+    const audio = p.audio === 'eleven' ? '<b>ElevenLabs</b> audio' : p.audio === 'kokoro' ? '<b>Kokoro</b> audio (cached)' : 'no audio yet';
+    row.innerHTML = `<div class="num">${(i % 9) + 1}</div>
+      <textarea data-i="${i}">${escapeHtml(p.Text || '')}</textarea>
+      <div class="audio">${audio}</div>
+      <div class="ctl">
+        <button class="small" data-act="up" data-i="${i}" title="move up">&uarr;</button>
+        <button class="small" data-act="down" data-i="${i}" title="move down">&darr;</button>
+        <button class="small" data-act="del" data-i="${i}" title="remove">&times;</button>
+      </div>`;
+    list.appendChild(row);
+  });
+}
+function escapeHtml(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+function collect() {
+  document.querySelectorAll('textarea[data-i]').forEach(t => { phrases[+t.dataset.i].Text = t.value.trim(); });
+  phrases = phrases.filter(p => p.Text.length > 0);
+}
+$('#list').addEventListener('click', e => {
+  const b = e.target.closest('button[data-act]'); if (!b) return;
+  collect(); const i = +b.dataset.i;
+  if (b.dataset.act === 'del') phrases.splice(i, 1);
+  if (b.dataset.act === 'up' && i > 0) [phrases[i - 1], phrases[i]] = [phrases[i], phrases[i - 1]];
+  if (b.dataset.act === 'down' && i < phrases.length - 1) [phrases[i + 1], phrases[i]] = [phrases[i], phrases[i + 1]];
+  render();
+});
+$('#add').onclick = () => { collect(); phrases.push({ Text: '' }); render(); document.querySelector('textarea[data-i="' + (phrases.length - 1) + '"]').focus(); };
+async function save() {
+  collect();
+  const r = await fetch('/phrases', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(phrases.map(p => ({ Text: p.Text }))) });
+  $('#status').textContent = r.ok ? 'Saved. The overlay uses the new list the next time you press F5.' : 'Save failed: ' + await r.text();
+  await load();
+}
+$('#save').onclick = save;
+$('#gen-kokoro').onclick = async () => {
+  await save(); $('#status').textContent = 'Generating with Kokoro...';
+  const r = await fetch('/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ engine: 'kokoro' }) });
+  $('#status').textContent = await r.text(); await load();
+};
+$('#el-list').onclick = async () => {
+  const r = await fetch('/eleven/voices', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: $('#el-key').value.trim() }) });
+  if (!r.ok) { $('#status').textContent = 'ElevenLabs: ' + await r.text(); return; }
+  const voices = await r.json(); const sel = $('#el-voice'); sel.innerHTML = '';
+  voices.forEach(v => { const o = document.createElement('option'); o.value = v.id; o.textContent = v.name + (v.labels ? '  (' + v.labels + ')' : ''); sel.appendChild(o); });
+  $('#status').textContent = voices.length + ' voices loaded.';
+};
+$('#el-gen').onclick = async () => {
+  await save(); $('#status').textContent = 'Generating with ElevenLabs...';
+  const r = await fetch('/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ engine: 'eleven', key: $('#el-key').value.trim(), voice: $('#el-voice').value }) });
+  $('#status').textContent = await r.text(); await load();
+};
+load();
+</script>
+</body>
+</html>
