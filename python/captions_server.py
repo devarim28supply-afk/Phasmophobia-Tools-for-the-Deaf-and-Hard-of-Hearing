@@ -161,8 +161,13 @@ def handle(conn: socket.socket):
 
 
 srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-srv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-srv.bind(("127.0.0.1", PORT))
+# No SO_REUSEADDR: on Windows it lets a second server silently bind the same port, and the
+# overlay can then end up talking to a stale process. Fail loudly instead.
+try:
+    srv.bind(("127.0.0.1", PORT))
+except OSError as e:
+    print(f"port {PORT} is already in use by another captioner: {e}", flush=True)
+    sys.exit(2)
 srv.listen(1)
 print(f"listening on 127.0.0.1:{PORT}", flush=True)
 while True:

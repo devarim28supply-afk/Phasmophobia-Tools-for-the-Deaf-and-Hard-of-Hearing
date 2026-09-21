@@ -73,6 +73,7 @@ public sealed class CaptionClient : IDisposable
                 string? line;
                 while ((line = reader.ReadLine()) != null)
                 {
+                    Log.Write("caption rx: " + (line.Length > 70 ? line.Substring(0, 70) : line));
                     try
                     {
                         using var doc = JsonDocument.Parse(line);

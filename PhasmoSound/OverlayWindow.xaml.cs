@@ -16,6 +16,7 @@ public partial class OverlayWindow : Window
     IntPtr hwnd;
     RECT lastRect;
     bool forceBorderless;
+    bool borderlessApplied;   // the game is made borderless once per run; after that we never fight it
     public bool OverlayVisible { get; private set; } = true;
     /// Fired for training hotkeys: label index 0..8 for Ctrl+1..9, -1 for F7 (unlabeled).
     public event Action<int>? TrainRequested;
@@ -258,7 +259,7 @@ public partial class OverlayWindow : Window
         }
         else
         {
-            userWantsWindowed = false; forceBorderless = true;
+            userWantsWindowed = false; forceBorderless = true; borderlessApplied = false;
         }
         PlaceOverGame();
     }
@@ -338,9 +339,9 @@ public partial class OverlayWindow : Window
                         var mi = new MONITORINFO { cbSize = Marshal.SizeOf<MONITORINFO>() };
                         if (mon != IntPtr.Zero && GetMonitorInfo(mon, ref mi))
                         {
-                            if ((cfg.BorderlessGame && !userWantsWindowed) || forceBorderless)
+                            if ((cfg.BorderlessGame && !userWantsWindowed && !borderlessApplied) || forceBorderless)
                             {
-                                try { MakeGameBorderless(wh, mi.rcMonitor, forceBorderless); } catch (Exception ex) { Log.Write("borderless: " + ex.Message); }
+                                try { MakeGameBorderless(wh, mi.rcMonitor, forceBorderless); borderlessApplied = true; } catch (Exception ex) { Log.Write("borderless: " + ex.Message); }
                                 forceBorderless = false;
                                 GetWindowRect(wh, out r);
                             }

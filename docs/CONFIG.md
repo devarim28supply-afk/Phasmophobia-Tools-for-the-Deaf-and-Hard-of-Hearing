@@ -64,7 +64,7 @@ Everything lives in `app\config.json`, written on first run. Edit it and restart
 | `UiScale` | `0` | `0` = automatic from screen height. Or a fixed multiplier like `1.3`. |
 | `EventLifetimeSec` / `MaxEvents` | `10` / `8` | Event log length. |
 | `FollowGame` / `GameProcess` | `true` / `"Phasmophobia"` | Which window to follow. |
-| `BorderlessGame` | `true` | Make the game borderless over its monitor at startup (F9 toggles). |
+| `BorderlessGame` | `true` | Make the game borderless over its monitor **once at startup** (F9 toggles it later). It is never re-applied, so the game is never dragged out of the display mode you chose. |
 
 ## Captions
 
