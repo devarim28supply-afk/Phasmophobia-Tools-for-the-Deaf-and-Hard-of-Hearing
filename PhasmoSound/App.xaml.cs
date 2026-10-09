@@ -20,6 +20,9 @@ public partial class App : System.Windows.Application
     readonly System.Collections.Generic.Dictionary<string, DateTime> lastSeen = new();
     InputWatch? input;
     SampleStore? store;
+    SoundHead? head;
+    HuntRecorder? hunts;
+    GhostWatch? ghostWatch;
     Speaker? speaker;
     SayWindow? say;
     CaptionClient? captions;
@@ -29,6 +32,10 @@ public partial class App : System.Windows.Application
     DateTime lastBackground = DateTime.MinValue, now0;
     readonly AutoResetEvent onsetSignal = new(false);
     DateTime lastPending = DateTime.MinValue;
+    readonly System.Collections.Generic.List<(DateTime t, float a)> stepHits = new();
+    DateTime lastStepHit = DateTime.MinValue, stepContextUntil = DateTime.MinValue, huntUntil = DateTime.MinValue;
+    bool manualHunt;                                  // Ctrl+3 started it: runs until Ctrl+3 again (5 min safety)
+    DateTime huntBlockUntil = DateTime.MinValue;     // after Ctrl+3 ended a hunt, the fading heartbeat must not start a new one
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -52,6 +59,9 @@ public partial class App : System.Windows.Application
             clf = new Classifier(Path.Combine(AppContext.BaseDirectory, "model", "yamnet.onnx"),
                                  Path.Combine(AppContext.BaseDirectory, "model", "yamnet_class_map.csv"));
             store = new SampleStore(Path.Combine(AppContext.BaseDirectory, "samples"));
+            var headPath = Path.Combine(AppContext.BaseDirectory, "model", "head.onnx");
+            if (cfg.UseTrainedHead && File.Exists(headPath))
+                try { head = new SoundHead(headPath, Path.Combine(AppContext.BaseDirectory, "model", "head_labels.json")); } catch (Exception ex) { Log.Write("trained head failed: " + ex.Message); }
         }
         catch (Exception ex)
         {
@@ -63,6 +73,11 @@ public partial class App : System.Windows.Application
 
         // start classifying before the window exists so a slow window never delays sound detection
         new Thread(ClassifyLoop) { IsBackground = true, Name = "classify", Priority = ThreadPriority.AboveNormal }.Start();
+        if (cfg.RecordHunts && engine != null)
+        {
+            hunts = new HuntRecorder(Path.Combine(AppContext.BaseDirectory, "samples", "hunts"));
+            engine.Samples16k += s => hunts.Feed(s);
+        }
         if (cfg.WhisperCaptions && engine != null)
         {
             captions = new CaptionClient(cfg, state);
@@ -72,6 +87,35 @@ public partial class App : System.Windows.Application
         Log.Write("creating window");
         win = new OverlayWindow(cfg, state);
         win.TrainRequested += OnTrain;
+        win.HuntKey += () =>
+        {
+            var t = DateTime.UtcNow; bool ending;
+            lock (state.Lock)
+            {
+                ending = t < huntUntil;
+                if (ending) { huntUntil = DateTime.MinValue; manualHunt = false; huntBlockUntil = t.AddSeconds(15); }
+                else { huntUntil = t.AddMinutes(5); manualHunt = true; }
+            }
+            if (ending)
+            {
+                ghostWatch?.SetActive(false);
+                Log.Write("Ctrl+3: hunt over");
+                Task.Run(() => { var saved = hunts?.End(t); Toast("Hunt over" + (saved != null ? "  ·  " + saved : "")); });
+            }
+            else { Log.Write("Ctrl+3: hunt mode on"); Toast("HUNT mode on  ·  Ctrl+3 = hunt over"); }
+        };
+        win.StopwatchKey += reset =>
+        {
+            // Ctrl+1 = start (never pauses; pressing it again while running does nothing), Ctrl+2 = stop and back to 0
+            var t = DateTime.UtcNow;
+            lock (state.Lock)
+            {
+                if (reset) { state.StopwatchStart = null; state.StopwatchElapsed = TimeSpan.Zero; Log.Write("stopwatch reset"); }
+                else if (state.StopwatchStart == null) { state.StopwatchStart = t; state.StopwatchElapsed = TimeSpan.Zero; Log.Write("stopwatch running"); }
+            }
+        };
+        if (cfg.GhostWatch) { var w0 = win; ghostWatch = new GhostWatch(cfg, state, () => w0.Handle, Path.Combine(AppContext.BaseDirectory, "samples", "hunts")); }
+        win.SaveLastRequested += () => Task.Run(() => Toast(hunts?.SaveLast(60) ?? "Hunt recorder is off"));
         if (cfg.Speak)
         {
             if (cfg.SetDefaultMic) DefaultMic.Ensure(cfg.MicDevice, cfg.DefaultMicVolume, cfg.MicFormatRate, cfg.SpeakDevice, cfg.Device);
@@ -191,6 +235,7 @@ public partial class App : System.Windows.Application
             floorAll += (f.LoudDb - floorAll) * (f.LoudDb > floorAll ? kUp : kDown);
             loudRel = cfg.MinDb + (f.LoudDb - floorAll) - cfg.AmbientGateDb;
         }
+        hunts?.Frame(f.Time, angle, conf, loudRel, input?.IsMoving ?? false, f.OnsetDb >= cfg.StepOnsetDb);
         lock (state.Lock)
         {
             if (state.ChannelDb.Length != f.ChannelRms.Length) state.ChannelDb = new float[f.ChannelRms.Length];
@@ -234,7 +279,44 @@ public partial class App : System.Windows.Application
                     Log.Write($"ONSET +{f.OnsetDb:F0}dB at {f.LoudDb:F0}dB dir={angle:F0}");
                 }
             }
+            // during a hunt the heartbeat thumps in the middle (it is not placed in the room): only off-centre hits are the ghost's steps
+            bool huntNow = f.Time < huntUntil;
+            if (cfg.StepMeter && f.OnsetDb >= cfg.StepOnsetDb && loudRel > cfg.MinDb && !ownOnset && (!huntNow || conf >= cfg.CenteredConf) && (f.Time - lastStepHit).TotalMilliseconds >= 150)
+            {
+                lastStepHit = f.Time;
+                stepHits.Add((f.Time, angle));
+                if (huntNow) hunts?.NoteSideStep();
+                stepHits.RemoveAll(x => (f.Time - x.t).TotalSeconds > 5);
+                UpdateStepTempo(f.Time);
+            }
         }
+    }
+
+    // caller holds state.Lock. Only while the classifier has recently heard footsteps: the median gap
+    // between the last few hits gives steps per second; the first vs last gaps say faster or slower.
+    void UpdateStepTempo(DateTime now)
+    {
+        if (now > stepContextUntil && now > huntUntil) return;
+        var hits = stepHits.Where(x => (now - x.t).TotalSeconds <= 4).ToList();
+        var gaps = new System.Collections.Generic.List<double>();
+        for (int i = 1; i < hits.Count; i++)
+        {
+            double g = (hits[i].t - hits[i - 1].t).TotalSeconds;
+            if (g >= 0.15 && g <= 1.0) gaps.Add(g);
+        }
+        if (gaps.Count < 3) return;
+        var sorted = gaps.OrderBy(g => g).ToList();
+        float rate = (float)(1 / sorted[sorted.Count / 2]);
+        float trend = gaps.Count >= 6 ? (float)(gaps.Take(3).Average() / gaps.TakeLast(3).Average()) : 1f;
+        var last = hits.TakeLast(3).Select(x => x.a).OrderBy(a => a).ToList();
+        state.StepRate = rate; state.StepTrend = trend; state.StepAngle = last[last.Count / 2];
+        state.StepHunting = now < huntUntil; state.StepUntil = now.AddSeconds(1.5);
+        Log.Write($"STEPS {rate:F2}/s trend={trend:F2} gaps={gaps.Count} dir={state.StepAngle:F0} hunt={state.StepHunting}");
+    }
+
+    void Toast(string text)
+    {
+        lock (state.Lock) { state.Toast = text; state.ToastUntil = DateTime.UtcNow.AddSeconds(3); }
     }
 
     // caller holds state.Lock
@@ -265,6 +347,15 @@ public partial class App : System.Windows.Application
                     ClassifyOnce(buf, 24000, fast: true, final: true);
                 }
                 else ClassifyOnce(buf, 24000, fast: false, final: false);
+                if (hunts != null || ghostWatch != null)
+                {
+                    bool hunting; lock (state.Lock) { hunting = DateTime.UtcNow < huntUntil; state.HuntActive = hunting; }
+                    ghostWatch?.SetActive(hunting);
+                    if (hunts == null) continue;
+                    bool manual; lock (state.Lock) manual = manualHunt;
+                    var saved = hunts.Update(DateTime.UtcNow, hunting, manual);
+                    if (saved != null) Toast(saved);
+                }
             }
             catch (Exception ex) { Log.Write("classify: " + ex.Message); Thread.Sleep(1000); }
         }
@@ -308,7 +399,8 @@ public partial class App : System.Windows.Application
                 {
                     // "custom" = clips you recorded (Ctrl+1..9), "game" = clips taken from the game's own files
                     bool useOwn = !(cfg.HideCategories?.Contains("custom", StringComparer.OrdinalIgnoreCase) ?? false);
-                    bool useGame = !(cfg.HideCategories?.Contains("game", StringComparer.OrdinalIgnoreCase) ?? false);
+                    // the trained head (below) replaces nearest-neighbour matching against the game files
+                    bool useGame = head == null && !(cfg.HideCategories?.Contains("game", StringComparer.OrdinalIgnoreCase) ?? false);
                     var (label, sim, file, isGame) = store.Nearest(emb, cfg.OwnSampleBonus, useOwn, useGame);
                     float bg = store.BackgroundSimilarity(emb);
                     customNote = $" | nearest={label} {sim:F2}{(isGame ? "g" : "")} bg={bg:F2}";
@@ -318,6 +410,19 @@ public partial class App : System.Windows.Application
                         // a known example matches: it outranks the generic model's guess
                         dets.RemoveAll(d => d.Label == label);
                         dets.Insert(0, new Detection(label, isGame ? "game" : "custom", sim, (isGame ? "game:" : "trained:") + file));
+                    }
+                }
+                if (head != null)
+                {
+                    // trained on the game's own sounds mixed with its ambience; "_" labels (background, equipment) are never shown
+                    var (hl, hp) = head.Predict(wave);
+                    customNote += $" | head={hl} {hp:F2}";
+                    bool strict = peak < cfg.HeadQuietDb || (cfg.HeadStrictLabels?.Contains(hl, StringComparer.OrdinalIgnoreCase) ?? false);
+                    float needHead = strict ? Math.Max(cfg.HeadMinProb, cfg.HeadStrictProb) : cfg.HeadMinProb;
+                    if (!hl.StartsWith('_') && hp >= needHead && !dets.Any(d => d.Category == "custom"))
+                    {
+                        dets.RemoveAll(d => d.Label == hl);
+                        dets.Insert(0, new Detection(hl, "game", hp, "head"));
                     }
                 }
                 if (cfg.HideCategories != null && cfg.HideCategories.Length > 0)
@@ -336,6 +441,8 @@ public partial class App : System.Windows.Application
                 lock (state.Lock)
                 {
                     state.Current = dets.Take(4).ToList();
+                    if (dets.Any(d => d.Label is "Footsteps" or "Running" or "Stomping")) stepContextUntil = now.AddSeconds(2);
+                    if (now >= huntBlockUntil && dets.Any(d => d.Label is "GHOST HUNTING" or "GHOST ATTACK" or "HEARTBEAT") && huntUntil < now.AddSeconds(cfg.HuntHoldSec)) huntUntil = now.AddSeconds(cfg.HuntHoldSec);
                     // footsteps clearly off to one side are somebody else's: mark that side
                     float stepLine = (input != null && input.IsMoving) ? cfg.OwnStepMaxDeg : cfg.StillStepMinDeg;
                     if (cfg.StepIcon && Math.Abs(peakAngle) > stepLine

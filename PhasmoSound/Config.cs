@@ -68,6 +68,25 @@ public sealed class Config
     public float OwnStepMaxDeg { get; set; } = 30f;    // while you are moving: steps inside this are yours
     public float StillStepMinDeg { get; set; } = 15f;  // while you stand still: steps beyond this get the icon
     public double StepIconSize { get; set; } = 64;
+    // Step meter: times footsteps that are not yours and shows steps per second + SLOW / NORMAL / FAST at the top.
+    // Every ghost uses the same footstep sounds, so the type shows in the SPEED, not the sound.
+    public bool StepMeter { get; set; } = true;
+    public float StepOnsetDb { get; set; } = 6f;               // a step = a jump of this many dB (lower than OnsetDb so quick steps all count)
+    public float GhostNormalStepsPerSec { get; set; } = 2.3f;  // a normal-speed ghost (1.7 m/s); calibrate from the log ("STEPS" lines)
+    public int HuntHoldSec { get; set; } = 25;                 // after "GHOST HUNTING" is heard, steps count as the ghost's for this long
+    // Save every hunt by itself to samples\hunts\ (sound + direction/moving timeline) for training ghost steps. Ctrl+0 = save the last 60 s.
+    public bool RecordHunts { get; set; } = true;
+    // Ghost watch: during a hunt, watch the game picture for the ghost's blinking and time it (visible / hidden).
+    // While it watches, the overlay is hidden from screen capture (OBS / Discord) so it does not see its own drawings.
+    public bool GhostWatch { get; set; } = true;
+    public bool SaveHuntFrames { get; set; } = true;        // samples\hunts\*_frames.gray320x180 (45 s max, ~2.6 MB/s) to check blinks by eye
+    public float BlinkMinChange { get; set; } = 12f;        // brightness change (0-255) of a 10x10 patch that counts as a pop
+    public float BlinkMaxBackground { get; set; } = 3f;     // ignore frames where the whole picture moves more than this (you turning)
+    public float BlinkPhantomHiddenSec { get; set; } = 1.0f;
+    public float BlinkOniHiddenSec { get; set; } = 0.3f;
+    // Stopwatch: Ctrl+1 start, Ctrl+2 reset (smudge / hunt cooldown timing). Shown top-left. Takes over the
+    // Ctrl+1 / Ctrl+2 training keys (Door open / Door close). Ctrl+3 = hunt over / hunt mode on (was Door slam); Ctrl+5 is off (hunts record themselves); Ctrl+4, Ctrl+6..9 still train.
+    public bool Stopwatch { get; set; } = true;
     public string MoveKeys { get; set; } = "W A S D Up Down Left Right Shift";
     public string ActionKeys { get; set; } = "E F G Q R T J C LButton RButton MButton";
     // Training: Ctrl+1 .. Ctrl+9 save the last 2.5 s of audio as an example of TrainLabels[n-1].
@@ -79,6 +98,13 @@ public sealed class Config
     public float CustomMatch { get; set; } = 0.82f;  // cosine similarity needed to accept a trained label (0-1)
     public float CustomMargin { get; set; } = 0.04f; // and it must beat the similarity to the room's background by this much
     public float GameMatch { get; set; } = 0.88f;    // stricter bar for the game's own (dry, studio) sound files in samples\game
+    public bool UseTrainedHead { get; set; } = true;  // model\head.onnx, trained by PhasmoTrain on the game's sounds
+    public float HeadMinProb { get; set; } = 0.6f;    // show its name only when it is at least this sure (0-1)
+    // Quiet room noise got called "CRUCIFIX BURNED" / "GHOST ATTACK" at 0.6-0.8 (2026-10-08): these names, and any
+    // sound quieter than HeadQuietDb, need HeadStrictProb instead.
+    public string[] HeadStrictLabels { get; set; } = { "CRUCIFIX BURNED", "GHOST ATTACK", "GHOST HUNTING", "SCREAM", "BANSHEE SCREAM", "HEARTBEAT" };
+    public float HeadStrictProb { get; set; } = 0.85f;
+    public float HeadQuietDb { get; set; } = -32f;
     public float OwnSampleBonus { get; set; } = 0.05f; // clips you recorded in-game outrank game files by this much
     public int TrainClipMs { get; set; } = 2500;
     // Speak: F6 opens a text box; Enter speaks the line into the virtual mic the game uses as your microphone.

@@ -14,12 +14,19 @@ public partial class OverlayWindow : Window
     readonly OverlayState state;
     readonly RadarElement radar;
     IntPtr hwnd;
+    public IntPtr Handle => hwnd;
     RECT lastRect;
     bool forceBorderless;
     bool borderlessApplied;   // the game is made borderless once per run; after that we never fight it
     public bool OverlayVisible { get; private set; } = true;
     /// Fired for training hotkeys: label index 0..8 for Ctrl+1..9, -1 for F7 (unlabeled).
     public event Action<int>? TrainRequested;
+    /// Fired for Ctrl+0: save the last 60 s of game sound (after a hunt you had to run from).
+    public event Action? SaveLastRequested;
+    /// Ctrl+1 (false) = stopwatch start, Ctrl+2 (true) = reset. These replace the Door open / Door close training keys.
+    public event Action<bool>? StopwatchKey;
+    /// Ctrl+3: hunt over (stop recording / blink watch), or start hunt mode by hand when none is running.
+    public event Action? HuntKey;
     /// Fired for F6: open the "say" box. Arguments: game rect (physical px) and the game window handle.
     public event Action<int, int, int, int, IntPtr>? SayRequested;
     /// Fired for Ctrl+F5: speak preset line 2. F5 toggles the phrase board; a digit fires PhraseChosen (1..9).
@@ -117,6 +124,7 @@ public partial class OverlayWindow : Window
         Log.Write($"source init: styles {sw.ElapsedMilliseconds} ms");
         if (!RegisterHotKey(hwnd, 1, 0, VK_F8)) Log.Write("hotkey F8 not registered");
         if (!RegisterHotKey(hwnd, 2, MOD_CONTROL, VK_F8)) Log.Write("hotkey Ctrl+F8 not registered");
+        if (!RegisterHotKey(hwnd, 9, MOD_CONTROL, 0x30)) Log.Write("hotkey Ctrl+0 not registered");
         if (!RegisterHotKey(hwnd, 3, 0, VK_F7)) Log.Write("hotkey F7 not registered");
         if (!RegisterHotKey(hwnd, 4, 0, VK_F9)) Log.Write("hotkey F9 not registered");
         if (!RegisterHotKey(hwnd, 5, 0, VK_F6)) Log.Write("hotkey F6 not registered");
@@ -124,7 +132,7 @@ public partial class OverlayWindow : Window
         if (!RegisterHotKey(hwnd, 7, 0, VK_F5)) Log.Write("hotkey F5 not registered");
         if (!RegisterHotKey(hwnd, 8, MOD_CONTROL, VK_F5)) Log.Write("hotkey Ctrl+F5 not registered");
         for (int i = 0; i < 9; i++)
-            if (!RegisterHotKey(hwnd, 10 + i, MOD_CONTROL, (uint)(0x31 + i))) Log.Write($"hotkey Ctrl+{i + 1} not registered");
+            if (i != 4 && !RegisterHotKey(hwnd, 10 + i, MOD_CONTROL, (uint)(0x31 + i)))   // Ctrl+5 (Ghost footsteps) removed, hunts record themselves Log.Write($"hotkey Ctrl+{i + 1} not registered");
         Log.Write($"source init: hotkeys {sw.ElapsedMilliseconds} ms");
         PlaceOverGame();
         Log.Write($"source init: placed {sw.ElapsedMilliseconds} ms");
@@ -294,6 +302,7 @@ public partial class OverlayWindow : Window
             if (id == 1) ToggleOverlay();
             else if (id == 2) System.Windows.Application.Current.Shutdown();
             else if (id == 3) TrainRequested?.Invoke(-1);
+            else if (id == 9) SaveLastRequested?.Invoke();
             else if (id == 4) ToggleBorderless();
             else if (id == 6) FreeMouse();
             else if (id == 7) ToggleBoard();
@@ -301,6 +310,9 @@ public partial class OverlayWindow : Window
             else if (id == 19) ToggleBoard(false);
             else if (id >= 20 && id < 29) { int idx = boardPage * 9 + (id - 20); ToggleBoard(false); PhraseChosen?.Invoke(idx, lastGameHwnd); }
             else if (id == 5) SayRequested?.Invoke(lastRect.Left, lastRect.Top, lastRect.Right, lastRect.Bottom, lastGameHwnd);
+            else if (id == 10 && cfg.Stopwatch) StopwatchKey?.Invoke(false);
+            else if (id == 11 && cfg.Stopwatch) StopwatchKey?.Invoke(true);
+            else if (id == 12) HuntKey?.Invoke();
             else if (id >= 10 && id < 19) TrainRequested?.Invoke(id - 10);
             handled = true;
         }
@@ -383,6 +395,7 @@ public partial class OverlayWindow : Window
         UnregisterHotKey(hwnd, 1);
         UnregisterHotKey(hwnd, 2);
         UnregisterHotKey(hwnd, 3);
+        UnregisterHotKey(hwnd, 9);
         UnregisterHotKey(hwnd, 4);
         UnregisterHotKey(hwnd, 5);
         UnregisterHotKey(hwnd, 6);

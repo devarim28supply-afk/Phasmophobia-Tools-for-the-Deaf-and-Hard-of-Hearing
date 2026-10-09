@@ -55,6 +55,25 @@ public sealed class OverlayState
     public List<Detection> Current = new();
     public readonly List<EventItem> Events = new();    // newest first
 
+    // step meter: how fast footsteps come (steps per second), set by the audio thread
+    public float StepRate;                              // 0 = none
+    public float StepTrend = 1f;                        // >1 = getting faster
+    public float StepAngle;
+    public bool StepHunting;                            // a hunt was heard in the last HuntHoldSec
+    public DateTime StepUntil = DateTime.MinValue;
+
+    // ghost watch: where the last blink was (0-1 of the game window) and the timing it measured
+    public double GhostMarkX, GhostMarkY;
+    public DateTime GhostMarkUntil = DateTime.MinValue;
+    public float BlinkVisible, BlinkHidden;
+    public string BlinkGuess = "";
+    public DateTime BlinkUntil = DateTime.MinValue;
+
+    // stopwatch (Ctrl+1 start, Ctrl+2 reset): Elapsed = time banked before the current run (Start = running since)
+    public bool HuntActive;                             // a hunt is on (heard, or Ctrl+3): shows "HUNT · Ctrl+3 = over"
+    public DateTime? StopwatchStart;
+    public TimeSpan StopwatchElapsed;
+
     // loudest moment since the classifier last looked (used to tag detections with a direction)
     public float WinPeakDb = -100f;
     public float WinPeakAngle;

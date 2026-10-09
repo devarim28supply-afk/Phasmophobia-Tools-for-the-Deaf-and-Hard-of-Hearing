@@ -42,6 +42,7 @@ public sealed class InputWatch
     public bool IsMoving => DateTime.UtcNow < movingUntil;
     public bool IsActing => DateTime.UtcNow < actingUntil;
 
+    public static bool KeyDown(int vk) => Down(vk);
     static bool Down(int vk) => (GetAsyncKeyState(vk) & 0x8000) != 0;
 
     [DllImport("user32.dll")] static extern short GetAsyncKeyState(int vk);

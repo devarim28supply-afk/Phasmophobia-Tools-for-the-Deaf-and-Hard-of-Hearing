@@ -384,7 +384,7 @@ public static class Labels
         "Thud", "Bounce", "Clatter", "Rattle", "Keys", "Clink", "Click", "Camera", "Paper", "Writing", "Whoosh", "Scrape",
         // labels learned from the game's own sound files (things you can also cause yourself)
         "Door open", "Door close", "Door creak", "Door moving", "Door lock", "Cabinet / drawer", "Gate", "Light switch",
-        "Item thrown / dropped", "Object interaction", "Sink / tap", "Toilet flush", "Squeaky toy", "Tarot card", "Spirit box",
+        "Item thrown / dropped", "Object interaction", "Door open / creak", "Drawer / cabinet", "Lock / key", "Water / tap", "Sink / tap", "Toilet flush", "Squeaky toy", "Tarot card", "Spirit box",
     };
 
     /// Sounds that actually occur in Phasmophobia (labels after mapping). Everything else is dropped in this profile.

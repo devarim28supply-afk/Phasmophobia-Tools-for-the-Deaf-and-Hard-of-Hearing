@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+- Step meter: times footsteps that are not yours and shows steps per second with SLOW / NORMAL / FAST
+  (every ghost uses the same footstep sounds, so the type shows in the speed).
+- Hunts record themselves: when the hunt heartbeat is heard, 30 s of sound plus a direction timeline is
+  saved to sampleshunts if footsteps were heard from the side. Ctrl+0 saves the last 60 s by hand.
+- Ctrl+3 = hunt mode on / hunt over (ends the recording and the ghost watch).
+- Stopwatch: Ctrl+1 start, Ctrl+2 reset, with smudge timing marks (Demon 60 / 90 / Spirit 180).
+  These keys replace the Door open / Door close training keys; Ctrl+5 is no longer a training key.
+- Ghost watch (experimental): during a hunt, watches the screen for the ghost blinking and saves the frames.
+  Light flicker and camera movement still fool it, so its BLINK guesses are not reliable yet.
+- Optional trained sound model (modelhead.onnx) is used when present; not included in the repo.
+
 ## v0.1 — 2026-09-20
 
 First public release. Built and tested in real multiplayer matches by a deaf player.

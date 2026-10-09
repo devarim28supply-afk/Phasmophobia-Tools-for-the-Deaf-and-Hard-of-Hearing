@@ -286,6 +286,88 @@ public sealed class RadarElement : FrameworkElement
                 new Rect(tx, ty, ft.Width + 32 * s, ts + 20 * s), 10 * s, 10 * s);
             Text(dc, toast, w / 2, ty + 9 * s, ts, Colors.White, true, 1);
         }
+
+        // --- step meter: how fast the footsteps come, and what that speed means during a hunt
+        float stepRate, stepTrend; bool stepHunt; DateTime stepUntil;
+        lock (state.Lock) { stepRate = state.StepRate; stepTrend = state.StepTrend; stepHunt = state.StepHunting; stepUntil = state.StepUntil; }
+        if (cfg.StepMeter && stepRate > 0 && now < stepUntil)
+        {
+            float rel = stepRate / Math.Max(0.1f, cfg.GhostNormalStepsPerSec);
+            var (word, col) = rel < 0.75f ? ("SLOW", Color.FromRgb(120, 200, 255))
+                            : rel < 1.3f ? ("NORMAL", Color.FromRgb(230, 230, 230))
+                            : rel < 1.7f ? ("FAST", Color.FromRgb(255, 170, 40))
+                            : ("VERY FAST", Color.FromRgb(255, 70, 60));
+            string trend = stepTrend > 1.2f ? "  ▲ speeding up" : stepTrend < 0.83f ? "  ▼ slowing" : "";
+            string line = $"{(stepHunt ? "GHOST STEPS" : "STEPS")}  {stepRate:F1}/s  {word}{trend}";
+            string stepHint = !stepHunt ? "" : rel < 0.75f ? "slow: Revenant (not chasing), Deogen (close), old Thaye, warm-room Hantu"
+                        : rel >= 1.7f && stepTrend <= 1.2f ? "fast from the start: Revenant chasing, young Thaye, Deogen far, Moroi, Jinn, Raiju, cold Hantu"
+                        : stepTrend > 1.2f ? "speeding up while it sees you = normal for most ghosts (not Hantu)" : "";
+            double fs = 22 * s, ty = 60 * s + 50 * s;
+            var ft = FT(line, fs, col, true);
+            double bw = Math.Max(ft.Width, stepHint.Length > 0 ? FT(stepHint, 14 * s, Colors.White, false).Width : 0) + 32 * s;
+            double bh = fs + 20 * s + (stepHint.Length > 0 ? 22 * s : 0);
+            double a = Math.Clamp((stepUntil - now).TotalSeconds / 0.5, 0, 1);
+            dc.PushOpacity(a);
+            dc.DrawRoundedRectangle(new SolidColorBrush(Color.FromArgb(200, 20, 20, 24)), new Pen(new SolidColorBrush(col), 2), new Rect(w / 2 - bw / 2, ty, bw, bh), 10 * s, 10 * s);
+            Text(dc, line, w / 2, ty + 9 * s, fs, col, true, 1);
+            if (stepHint.Length > 0) Text(dc, stepHint, w / 2, ty + fs + 14 * s, 14 * s, Color.FromArgb(220, 255, 255, 255), false, 1);
+            dc.Pop();
+        }
+        // --- ghost watch: red corners where the screen just blinked, and the blink timing box
+        double gmx, gmy; DateTime gmUntil, blUntil; float blVis, blHid; string blGuess;
+        lock (state.Lock) { gmx = state.GhostMarkX; gmy = state.GhostMarkY; gmUntil = state.GhostMarkUntil; blVis = state.BlinkVisible; blHid = state.BlinkHidden; blGuess = state.BlinkGuess; blUntil = state.BlinkUntil; }
+        if (now < gmUntil)
+        {
+            double gx = gmx * w, gy = gmy * h, half = 60 * s, len = 22 * s;
+            var pen = new Pen(new SolidColorBrush(Color.FromArgb((byte)(255 * Math.Clamp((gmUntil - now).TotalSeconds / 0.6, 0, 1)), 255, 60, 60)), 4 * s);
+            foreach (var (sx, sy) in new[] { (-1, -1), (1, -1), (-1, 1), (1, 1) })
+            {
+                var c = new Point(gx + sx * half, gy + sy * half);
+                dc.DrawLine(pen, c, new Point(c.X - sx * len, c.Y));
+                dc.DrawLine(pen, c, new Point(c.X, c.Y - sy * len));
+            }
+        }
+        if (now < blUntil && blGuess.Length > 0)
+        {
+            string bl = $"BLINK  seen {blVis:F2}s / hidden {blHid:F2}s  ·  {blGuess}";
+            double fs2 = 20 * s, by2 = 60 * s + 50 * s + 80 * s;
+            var bft = FT(bl, fs2, Colors.White, true);
+            var bcol = Color.FromRgb(255, 90, 90);
+            dc.DrawRoundedRectangle(new SolidColorBrush(Color.FromArgb(200, 20, 20, 24)), new Pen(new SolidColorBrush(bcol), 2), new Rect(w / 2 - bft.Width / 2 - 16 * s, by2, bft.Width + 32 * s, fs2 + 20 * s), 10 * s, 10 * s);
+            Text(dc, bl, w / 2, by2 + 9 * s, fs2, Colors.White, true, 1);
+        }
+        // --- hunt indicator (top-right): the overlay thinks a hunt is on; Ctrl+3 tells it the hunt is over
+        bool huntOn; lock (state.Lock) huntOn = state.HuntActive;
+        if (huntOn)
+        {
+            string ht = "HUNT  ·  Ctrl+3 = over";
+            double hfs = 18 * s; var hft = FT(ht, hfs, Colors.White, true);
+            double hx = w - cfg.EdgeThickness * s - 20 * s - hft.Width - 24 * s, hy = 60 * s;
+            dc.DrawRoundedRectangle(new SolidColorBrush(Color.FromArgb(210, 150, 20, 20)), new Pen(new SolidColorBrush(Color.FromRgb(255, 80, 80)), 2), new Rect(hx, hy, hft.Width + 24 * s, hfs + 16 * s), 8 * s, 8 * s);
+            Text(dc, ht, hx + 12 * s, hy + 7 * s, hfs, Colors.White, true, 0);
+        }
+
+        // --- stopwatch (Ctrl+1 start, Ctrl+2 reset): big time top-left, with the smudge marks (Demon 60 s, normal 90 s, Spirit 180 s)
+        DateTime? swStart; TimeSpan swEl;
+        lock (state.Lock) { swStart = state.StopwatchStart; swEl = state.StopwatchElapsed; }
+        if (cfg.Stopwatch && (swStart != null || swEl > TimeSpan.Zero))
+        {
+            var el = swStart is DateTime st0 ? swEl + (now - st0) : swEl;
+            string tt = $"{(int)el.TotalMinutes}:{el.Seconds:00}";
+            double fs3 = 40 * s, x0 = cfg.EdgeThickness * s + 20 * s, y0 = 60 * s;
+            var tcol = swStart != null ? Color.FromRgb(120, 255, 160) : Color.FromRgb(255, 220, 90);
+            var tft = FT(tt, fs3, tcol, true);
+            double bw3 = Math.Max(tft.Width, 230 * s) + 28 * s, bh3 = fs3 + 46 * s;
+            dc.DrawRoundedRectangle(new SolidColorBrush(Color.FromArgb(200, 20, 20, 24)), new Pen(new SolidColorBrush(tcol), 2), new Rect(x0, y0, bw3, bh3), 10 * s, 10 * s);
+            Text(dc, tt, x0 + 14 * s, y0 + 6 * s, fs3, tcol, true, 0);
+            double mx = x0 + 14 * s;
+            foreach (var (sec, name) in new[] { (60, "Demon 60"), (90, "90"), (180, "Spirit 180") })
+            {
+                bool passed = el.TotalSeconds >= sec;
+                mx += Text(dc, (passed ? "✓ " : "") + name, mx, y0 + fs3 + 16 * s, 14 * s, passed ? Color.FromRgb(255, 120, 120) : Color.FromArgb(200, 255, 255, 255), passed, 0) + 14 * s;
+            }
+            Text(dc, "Ctrl+2 reset", x0 + bw3 - 10 * s, y0 + 8 * s, 11 * s, Color.FromArgb(170, 255, 255, 255), false, 2);
+        }
         float lt = Level(loud);
         bool ring = string.Equals(cfg.Style, "ring", StringComparison.OrdinalIgnoreCase);
 
